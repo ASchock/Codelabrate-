@@ -1,0 +1,23 @@
+﻿@model TeacherStudentEditor.Models.QuestionSummaryViewModel
+
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">@Html.ActionLink(Model.Title, "Details", new { id = Model.Id })</h5>
+                <h6 class="card-subtitle">@Model.CategoryName</h6>
+                <p class="card-text">@Model.Text</p>
+            </div>
+            <div class="card-footer">
+                <div class="float-left">
+                    Asked @Model.Asked by @Model.AskedBy
+                </div>
+                <div class="float-right">
+                    <span class="badge">@Html.DisplayFor(model => model.VoteCount)</span> @(Model.VoteCount == 1 ? "vote" : "votes")
+                    <span class="badge">@Html.DisplayFor(model => model.AnswerCount)</span> @(Model.AnswerCount == 1 ? "answer" : "answers")
+                    <span class="badge">@Html.DisplayFor(model => model.ViewCount)</span> @(Model.ViewCount == 1 ? "view" : "views")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

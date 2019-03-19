@@ -1,0 +1,48 @@
+﻿@using TeacherStudentEditor.Models
+@model TeacherStudentEditor.Models.Question
+
+@{
+    ViewBag.Title = "Question";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="section_padding_50">
+    <div class="container">
+        <div class="row">
+            <div class="col-10">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="display:inline-block">@Model.Title</h4>
+                        <span class="float-right">
+                            @Model.AskedBy.UserName
+                        </span>
+                    </div>
+                    <div class="card-body">
+                        <h6 class="card-subtitle">@Model.Category.Name</h6>
+                        <p class="card-text">@Model.Text</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-2">
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        Asked @Html.DisplayFor(model => model.Asked)
+                    </li>
+                    <li class="list-group-item">
+                        Viewed @Html.DisplayFor(model => model.ViewCount) @(Model.ViewCount == 1 ? "time" : "times")
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <hr class="afterQuestion" />
+        @foreach (Answer answer in Model.Answers.OrderByDescending(x => x.Answered))
+        {
+            @Html.Partial("~/Views/Answers/SingleAnswer.cshtml", answer)
+        }
+        @Html.Partial("~/Views/Answers/CreateAnswer.cshtml", new CreateAnswerViewModel() { QuestionId = Model.Id })
+        @*<p>
+                @Html.ActionLink("Edit", "Edit", new { id = Model.Id }) |
+                @Html.ActionLink("Back to List", "Index")
+            </p>*@
+    </div>
+</section>

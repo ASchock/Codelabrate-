@@ -1,0 +1,27 @@
+﻿@model IEnumerable<TeacherStudentEditor.Models.QuestionSummaryViewModel>
+
+@{
+    ViewBag.Title = "Questions";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+<section class="section_padding_50">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <p>
+                    @Html.ActionLink("Ask New Question", "Create")
+                </p>
+                @foreach (var item in Model)
+                {
+                    @Html.Partial("SingleQuestionSummary", item)
+
+                    @*<td>
+                            @Html.ActionLink("Edit", "Edit", new { id=item.Id }) |
+                            @Html.ActionLink("Details", "Details", new { id=item.Id }) |
+                            @Html.ActionLink("Delete", "Delete", new { id=item.Id })
+                        </td>*@
+                }
+            </div>
+        </div>
+    </div>
+</section>

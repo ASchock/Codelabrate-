@@ -1,0 +1,233 @@
+﻿@model EditorSession
+@{
+    ViewData["Title"] = $"Session";
+    bool teacherMode = Model.Teacher.UserName == Context.User.Identity.Name;
+}
+<section class=" section_padding_50">
+    <div class="container">
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h4>@Model.Title</h4>
+                        <h6>@Model.Language</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-9">
+                                <div id="editor" style="width:auto;height:500px;border:1px solid grey"></div>
+                            </div>
+                            <div class="col-md-3">
+                                <h5>Questions & Comments</h5>
+                                <div id="questions" style="width: auto;">
+                                    <ul class="list-group" id="commentsPanel"></ul>
+                                    <div id="postComment" style="display: none; margin-top:20px">
+                                        <div class="input-group">
+                                            <input type="text" class="form-control" id="commentText" placeholder="Comment...">
+                                            <span class="input-group-append">
+                                                <button class="btn btn-outline-secondary" type="button" id="postCommentButton" onclick="postComment()">
+                                                    <i class="fa fa-comment" aria-hidden="true"></i>
+                                                </button>
+                                            </span>
+                                        </div><!-- /input-group -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</section>
+
+<style>
+    .editor-question {
+        background-color: goldenrod
+    }
+</style>
+
+<script type="template/html" id="leftCommentTemplate">
+    <li class="list-group-item">
+        <i class="fa fa-comment" aria-hidden="true" style="transform: scaleX(-1)"></i>
+        <span>[COMMENT]</span>
+    </li>
+</script>
+<script type="template/html" id="rightCommentTemplate">
+    <li class="list-group-item" style="text-align: right">
+        <span>[COMMENT]</span>
+        <i class="fa fa-comment" aria-hidden="true"></i>
+    </li>
+</script>
+
+@section scripts{
+    <script src="~/lib/signalr/dist/browser/signalr.js"></script>
+    <script src="/lib/monaco-editor/dev/vs/loader.js"></script>
+
+    <script>
+        var connection = new signalR.HubConnectionBuilder()
+            .withUrl('/sessions?sessionid=@Model.Id')
+            .configureLogging(signalR.LogLevel.Trace)
+            .build();
+
+        var editor;
+        var selectedQuestion;
+        var dirty;
+        var questions = @Json.Serialize(Model.Questions);
+        var oldDeltaDecorations = [];
+        var leftCommentTemplate = $('#leftCommentTemplate').html();
+        var rightCommentTemplate = $('#rightCommentTemplate').html();
+        var commentsPanel = $('#commentsPanel');
+        var currentUser = '@Context.User.Identity.Name';
+
+        connection.start().catch(function(err) {
+            return console.error(err.toString());
+        });
+
+        connection.on("ReceiveChanges",
+            (changes) => {
+                switch (changes.type) {
+                case "edit":
+                    editor.getModel().applyEdits(changes.payload.delta.slice());
+                    break;
+                case "selectionChange":
+                    //a = b.state.editor.deltaDecorations(b.oldDeltaDecorations, [{
+                    //        range: a.payload.delta,
+                    //        options: {
+                    //            isWholeLine: !1,
+                    //            className: "editor-selection"
+                    //        }
+                    //    }]),
+                    //    b.oldDeltaDecorations = a
+                }
+            });
+
+        connection.on("QuestionPosted",
+            (question) => {
+                questions.push(question);
+                updateQuestionDecorations();
+            });
+        connection.on("CommentPosted",
+            (questionId, comment) => {
+                let question = questions.find(x => x.id == questionId);
+                question.comments.push(comment);
+                if (selectedQuestion.id == questionId)
+                    showQuestion();
+            });
+
+        function mapChangeEvent(changeEvent) {
+            return {
+                type: 'edit',
+                payload: {
+                    at: (new Date).getTime(),
+                    delta: convertToEditOperations(changeEvent)
+                }
+            }
+        }
+
+        function convertToEditOperations(changeEvent) {
+            return changeEvent.changes.map(x => {
+                return {
+                    text: x.text,
+                    range: new monaco.Range(x.range.startLineNumber,
+                        x.range.startColumn,
+                        x.range.endLineNumber,
+                        x.range.endColumn),
+                    forceMoveMarkers: x.forceMoveMarkers
+                }
+            });
+        }
+
+        function postComment() {
+            var questionId = selectedQuestion ? selectedQuestion.id : '';
+            connection.invoke("PostComment", questionId, editor.getSelection(), $('#commentText').val());
+        }
+
+        function saveCode() {
+            if (!dirty)
+                return;
+            connection.invoke("SaveCode", editor.getValue());
+            dirty = false;
+        }
+
+        function showQuestion() {
+            var html = '';
+            if (!selectedQuestion) {
+                commentsPanel.html('');
+                $('#postComment').hide();
+                return;
+            }
+            selectedQuestion.comments.forEach(x => {
+                if (x.user.userName == currentUser) {
+                    html += leftCommentTemplate.replace('[COMMENT]', x.text);
+                } else {
+                    html += rightCommentTemplate.replace('[COMMENT]', x.text);
+                }
+            });
+            commentsPanel.html(html);
+            $('#postComment').show();
+        };
+
+        function updateQuestionDecorations() {
+            oldDeltaDecorations = editor.deltaDecorations(oldDeltaDecorations,
+                questions.map(x => {
+                    return {
+                        range: x,
+                        options: {
+                            isWholeLine: false,
+                            className: 'editor-question'
+                        }
+                    }
+                }));
+        }
+
+        require.config({ paths: { 'vs': '/lib/monaco-editor/dev/vs' } });
+        require(['vs/editor/editor.main'],
+            function() {
+                editor = monaco.editor.create(document.getElementById('editor'),
+                    {
+                        value: '@Html.Raw(Json.Serialize(Model.Code).ToString().Replace("\"", ""))',
+                        language: '@Model.Language',
+                        readOnly: @((!teacherMode).ToString().ToLowerInvariant())
+                    });
+
+                @if (teacherMode)
+                {
+                    <text>
+                        editor.getModel().onDidChangeContent(changes => {
+                            dirty = true;
+                            connection.invoke("PostChanges", mapChangeEvent(changes));
+                        });
+                        setInterval(saveCode, 5000);
+                    </text>
+
+                }
+
+                @if (!teacherMode)
+                {
+                    <text>
+                        editor.onDidChangeCursorSelection(selectionChangeEvent => {
+                            if (selectionChangeEvent.reason == monaco.editor.CursorChangeReason.Explicit) {
+                                if (selectionChangeEvent.selection.isEmpty()) {
+                                    $('#postComment').hide();
+                                } else {
+                                    $('#postComment').show();
+                                }
+                            }
+                        });
+                    </text>
+                }
+
+                updateQuestionDecorations();
+
+                editor.onMouseDown(x => {
+                    let question = questions.find(y => {
+                        return monaco.Range.containsPosition(y, x.target.position);
+                    });
+                    selectedQuestion = question;
+                    showQuestion();
+                });
+            });
+    </script>
+}

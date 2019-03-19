@@ -1,0 +1,30 @@
+@using Microsoft.AspNetCore.Identity
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    var logoutParams = new Dictionary<string, string>
+    {
+        { "returnUrl", Url.Action("Index", "Home", new { area = "" }) }
+    };
+}
+
+@if (SignInManager.IsSignedIn(User))
+{
+    <ul class="navbar-nav navbar-right animated">
+        <li class="nav-item">
+            <a class="nav-link" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @UserManager.GetUserName(User)!</a>
+        </li>
+        <li class="nav-item">
+            <a asp-area="Identity" asp-page="/Account/Logout" asp-all-route-data="logoutParams" class="nav-link">Logout</a>
+        </li>
+    </ul>
+}
+else
+{
+    <ul class="navbar-nav navbar-right animated">
+        <li class="nav-item"><a asp-area="Identity" asp-page="/Account/Register" class="nav-link">Register</a></li>
+        <li class="nav-item"><a asp-area="Identity" asp-page="/Account/Login" class="nav-link">Login</a></li>
+    </ul>
+}

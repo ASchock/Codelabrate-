@@ -1,0 +1,71 @@
+﻿@model IEnumerable<TeacherStudentEditor.Models.EditorSession>
+
+@{
+    ViewData["Title"] = "Sessions";
+}
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <p>
+                <a asp-action="Create">Create New Session</a>
+            </p>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>
+                            Teacher
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Title)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Language)
+                        </th>
+                        @*<th>
+                            @Html.DisplayNameFor(model => model.Started)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.Ended)
+                        </th>*@
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Teacher.UserName)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Title)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Language)
+                            </td>
+                            @*<td>
+                                @Html.DisplayFor(modelItem => item.Started)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.Ended)
+                            </td>*@
+                            <td>
+                                @if (item.Teacher.UserName == Context.User.Identity.Name)
+                                    {
+                                        <a asp-action="JoinAsTeacher" asp-route-id="@item.Id">Join as Teacher</a>
+                                    }
+                                    else
+                                    {
+                                        <a asp-action="JoinAsStudent" asp-route-id="@item.Id">Join as Student</a>
+                                    }
+                                @*<a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |*@
+                                @*<a asp-action="Details" asp-route-id="@item.Id">Details</a> |*@
+                                | <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

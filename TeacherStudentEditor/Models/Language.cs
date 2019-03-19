@@ -1,0 +1,62 @@
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace TeacherStudentEditor.Models
+{
+    public enum Language
+    {
+        apex,
+        [Display(Name="AZCli")]
+        azcli,
+        bat,
+        c,
+        clojure,
+        [Display(Name ="CoffeeScript")]
+        coffeescript,
+        cpp,
+        csharp,
+        csp,
+        css,
+        dockerfile,
+        fsharp,
+        go,
+        handlebars,
+        html,
+        ini,
+        java,
+        javascript,
+        json,
+        less,
+        lua,
+        markdown,
+        msdax,
+        mysql,
+        objective_c,
+        perl,
+        pgsql,
+        php,
+        plaintext,
+        postiats,
+        powerquery,
+        powershell,
+        pug,
+        python,
+        r,
+        razor,
+        redis,
+        redshift,
+        ruby,
+        rust,
+        sb,
+        scheme,
+        scss,
+        shell,
+        sol,
+        sql,
+        st,
+        swift,
+        typescript,
+        vb,
+        xml,
+        yaml
+    }
+}

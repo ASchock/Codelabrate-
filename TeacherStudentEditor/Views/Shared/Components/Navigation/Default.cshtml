@@ -1,0 +1,58 @@
+﻿@model List<Category>
+<!-- Menu Area Start -->
+<div class="col-12 h-100">
+    <div class="menu_area h-100">
+        <nav class="navbar h-100 navbar-expand-lg align-items-center">
+            <!-- Logo -->
+            <a class="navbar-brand" href="index.html"><img src="~/images/core-img/logo.png" alt="logo"></a>
+
+            <!-- Menu Area -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#mosh-navbar" aria-controls="mosh-navbar" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+
+            <div class="collapse navbar-collapse justify-content-end" id="mosh-navbar">
+                <ul class="navbar-nav animated" id="nav">
+                    <li class="nav-item active"><a class="nav-link" href="index.html">Home</a></li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="courseDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Courses</a>
+                        <div class="dropdown-menu" aria-labelledby="courseDropdown">
+                            @foreach (Category category in Model)
+                            {
+                                <a class="dropdown-item" href="index.html">@category.Name</a>
+                            }
+                        </div>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="EditorSessions">Sessions</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Questions" asp-action="Index">Questions</a></li>
+                    @*<li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>*@
+                    @if (User.IsInRole("Administrator"))
+                    {
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="adminDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Admin</a>
+                            <div class="dropdown-menu" aria-labelledby="adminDropdown">
+                                <a class="dropdown-item" asp-controller="Categories" asp-action="Index">Categories</a>
+                                <a class="dropdown-item" asp-controller="Courses" asp-action="Index">Courses</a>
+                            </div>
+                        </li>
+                    }
+                </ul>
+                <!-- Search Form Area Start -->
+                <div class="search-form-area animated">
+                    <form action="#" method="post">
+                        <input type="search" name="search" id="search" placeholder="Type keywords &amp; hit enter">
+                        <button type="submit" class="d-none"><img src="~/images/core-img/search-icon.png" alt="Search"></button>
+                    </form>
+                </div>
+                <!-- Search btn -->
+                <div class="search-button">
+                    <a href="#" id="search-btn"><img src="~/images/core-img/search-icon.png" alt="Search"></a>
+                </div>
+                <!-- Login/Register btn -->
+                @*<div class="login-register-btn">
+                        <a href="#">Login</a>
+                        <a href="#">/ Register</a>
+                    </div>*@
+                <partial name="_LoginPartial" />
+            </div>
+        </nav>
+    </div>
+</div>
